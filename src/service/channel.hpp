@@ -7,6 +7,7 @@
 #include "../model/user_channel.hpp"
 #include "../model/user.hpp"
 #include "sqlite_orm/sqlite_orm.h"
+#include <optional>
 
 namespace service {
     template <typename S>
@@ -16,7 +17,7 @@ namespace service {
         channel(S & storage) : storage(storage) {}
         int insert(model::channel & channel) {
             channel.created_at = storage.select(sqlite_orm::datetime("now", "+2 hours")).front();
-            return channel.id = storage.template insert(channel);
+            return channel.id = storage.template insert<model::channel>(channel);
         }
 
         void update(model::channel & channel) {
@@ -26,7 +27,7 @@ namespace service {
 
         std::optional<model::channel> get(int id) {
             try {
-                return storage.template get<model::channel>(id);
+                return std::move(storage.template get<model::channel>(id));
             } catch (std::system_error & e) {
                 return {};
             }
