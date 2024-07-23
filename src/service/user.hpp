@@ -3,6 +3,8 @@
 #include <string>
 #include <system_error>
 #include "../model/user.hpp"
+#include "../model/channel.hpp"
+#include "../model/user_channel.hpp"
 #include <optional>
 
 namespace service {
@@ -19,6 +21,15 @@ namespace service {
         void update(model::user & user) {
             user.updated_at = storage.select(sqlite_orm::datetime("now", "+2 hours")).front();
             storage.template update<model::user>(user);
+        }
+
+        std::vector<model::channel> get_channels(const model::user & user){
+            using namespace sqlite_orm;
+            return storage.template get_all<model::channel>(
+                where(
+                    in(&model::channel::id, 
+                    select(&model::user_channel::channel_id, 
+                        where(c(&model::user_channel::user_id) == user.id)))));
         }
 
         std::optional<model::user> get(int id) {

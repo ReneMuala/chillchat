@@ -27,20 +27,22 @@ public:
       : app(app), user_service(user_service), message_service(message_service) {
     controller_register_api_route_auth(
         message, "send", "/send", "send a new message", "POST"_method, profile);
+        
   }
 
   crow::response profile(const crow::request &req) {
     auto &session = app.get_context<Session>(req);
     auto id = session.get("id", -1);
     auto user = user_service.get(id);
+     if (!user)
+      return crow::response{crow::status::FORBIDDEN};
+
     auto resp = crow::json::wvalue{};
-    auto body = crow::json::load(req.body);
+    crow::json::wvalue body = crow::json::load(req.body);
 
     try {
-      auto message = model::message{
-          .user_id = std::make_unique<int>(user->id),
-          .channel_id = std::make_unique<int>((int)body["channel_id"]),
-          .content = (std::string)body["content"]};
+      body["user_id"] = user.value().id;
+      auto message = model::message::from_json(crow::json::load(body.dump()));
       message_service.insert(message);
       resp["message_id"] = message.id;
       return crow::response{resp};

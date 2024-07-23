@@ -39,8 +39,8 @@ namespace service {
 
         int add_user(const model::channel & channel,const model::user & user){
             return storage.template insert<model::user_channel>(model::user_channel {
-                .user_id = std::make_unique<int>(user.id),
-                .channel_id = std::make_unique<int>(channel.id),
+                .user_id = user.id,
+                .channel_id = channel.id,
                 .created_at = storage.select(sqlite_orm::datetime("now", "+2 hours")).front()
             });
         }

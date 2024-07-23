@@ -1,17 +1,42 @@
 #pragma once
 
+#include "crow/json.h"
 #include <string>
 #include <sqlite_orm/sqlite_orm.h>
 
 namespace model{
     struct channel {
         int id;
-        std::unique_ptr<int> super;
+        std::unique_ptr<decltype(model::channel::id)> super;
         std::string name;
         std::string description;
         std::string language;
         std::string created_at;
         std::string updated_at;
+
+        inline crow::json::wvalue to_json() const {
+            return {
+                {"id", id},
+                {"name", name},
+                {"description", description},
+                {"language", language},
+                {"created_at", created_at},
+                {"updated_at", updated_at},
+                {"super", super ? *super : 0}
+            };
+        }
+
+        static inline model::channel from_json(const crow::json::rvalue & json){
+            return {
+                (int)json["id"].i(),
+                nullptr,
+                json["name"].s(),
+                json["description"].s(),
+                json["language"].s(),
+                json["created_at"].s(),
+                json["updated_at"].s()
+            };
+        }
 
         static inline auto make_table(){
             using namespace sqlite_orm;
