@@ -24,13 +24,11 @@ namespace model {
 
         static inline model::user from_json(const crow::json::rvalue & json){
             return {
-                (int)json["id"].i(),
+                0,
                 nullptr,
                 json["name"].s(),
                 json["email"].s(),
                 json["password"].s(),
-                json["created_at"].s(),
-                json["updated_at"].s()
             };
         }
         

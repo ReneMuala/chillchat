@@ -40,7 +40,7 @@ namespace service {
             }
         }
 
-        model::user get_login(const std::string & email, const std::string & password) {
+        std::optional<model::user> get_login(const std::string & email, const std::string & password) {
             using namespace sqlite_orm;
             try {
                 return std::move(storage.template get_all<model::user>(where(c(&model::user::email) == email and c(&model::user::password) == password)).at(0));

@@ -25,31 +25,45 @@ public:
   message(crow::Crow<M...> &app, service::user<US> &user_service,
           service::message<MS> &message_service)
       : app(app), user_service(user_service), message_service(message_service) {
-    controller_register_api_route_auth(
-        message, "send", "/send", "send a new message", "POST"_method, profile);
-        
+    controller_register_api_route_auth(message, "create", "/create",
+                                       "send a new message", "POST"_method,
+                                       create);
+    controller_register_api_route_auth(message, "update", "/update",
+                                       "updates a message", "PUT"_method,
+                                       update);
   }
 
-  crow::response profile(const crow::request &req) {
+  crow::response create(const crow::request &req) {
     auto &session = app.get_context<Session>(req);
     auto id = session.get("id", -1);
     auto user = user_service.get(id);
-     if (!user)
+    if (!user)
       return crow::response{crow::status::FORBIDDEN};
 
-    auto resp = crow::json::wvalue{};
     crow::json::wvalue body = crow::json::load(req.body);
 
-    try {
-      body["user_id"] = user.value().id;
-      auto message = model::message::from_json(crow::json::load(body.dump()));
-      message_service.insert(message);
-      resp["message_id"] = message.id;
-      return crow::response{resp};
-    } catch (std::runtime_error &e) {
-      resp["error"] = e.what();
-      return crow::response{crow::status::BAD_REQUEST, resp};
-    }
+    body["user_id"] = user.value().id;
+    auto message = model::message::from_json(crow::json::load(body.dump()));
+    message_service.insert(message);
+    return crow::response{message.to_json()};
+  }
+
+  crow::response update(const crow::request &req) {
+    auto &session = app.get_context<Session>(req);
+    auto id = session.get("id", -1);
+    auto user = user_service.get(id);
+    if (!user)
+      return crow::response{crow::status::FORBIDDEN};
+    crow::json::rvalue body = crow::json::load(req.body);
+
+    auto new_message = model::message::from_json(body);
+    auto old_message = message_service.get(new_message.id);
+    if (!old_message or old_message.value().user_id != user.value().id)
+      return crow::response{crow::status::NOT_FOUND};
+    new_message.id = old_message.value().id;
+    new_message.created_at = old_message.value().created_at;
+    message_service.update(new_message);
+    return crow::response{new_message.to_json()};
   }
 };
 } // namespace controller

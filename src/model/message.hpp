@@ -51,8 +51,7 @@ namespace model {
                 make_column("updated_at", &message::updated_at),
                 make_column("reply_to", &message::reply_to),
                 foreign_key(&message::user_id).references(&model::user::id),
-                foreign_key(&message::channel_id).references(&model::channel::id),
-                unique(&message::channel_id, &message::user_id)
+                foreign_key(&message::channel_id).references(&model::channel::id)
             );
         }
     };
