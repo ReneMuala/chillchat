@@ -30,8 +30,8 @@ namespace model{
 
         static inline model::channel from_json(const crow::json::rvalue & json){
             return {
-                0,
-                nullptr,
+                json.has("id") ? (int)json["id"] : 0,
+                json.has("super") ? std::make_unique<int>((int)json["super"].i()) : nullptr,
                 json["name"].s(),
                 json["description"].s(),
                 json["language"].s(),

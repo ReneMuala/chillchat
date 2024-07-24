@@ -24,8 +24,8 @@ namespace model {
 
         static inline model::user from_json(const crow::json::rvalue & json){
             return {
-                0,
-                nullptr,
+                json.has("id") ? (int)json["id"] : 0,
+                json.has("super") ? std::make_unique<int>((int)json["super"].i()) : nullptr,
                 json["name"].s(),
                 json["email"].s(),
                 json["password"].s(),

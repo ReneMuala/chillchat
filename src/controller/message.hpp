@@ -1,8 +1,9 @@
 #pragma once
-#include "../../middleware/auth.hpp"
-#include "../../service/message.hpp"
-#include "../../service/user.hpp"
+#include "../middleware/auth.hpp"
+#include "../service/message.hpp"
+#include "../service/user.hpp"
 #include "_common.hpp"
+#include "crow/TinySHA1.hpp"
 #include "crow/common.h"
 #include "crow/http_request.h"
 #include "crow/http_response.h"
@@ -31,8 +32,12 @@ public:
     controller_register_api_route_auth(message, "update", "/update",
                                        "updates a message", "PUT"_method,
                                        update);
+    controller_register_api_route_auth(
+        message, "all", "/all",
+        "get path(limit) messages created or updated after path(after)", "GET"_method,
+        all);
   }
-
+  
   crow::response create(const crow::request &req) {
     auto &session = app.get_context<Session>(req);
     auto id = session.get("id", -1);
@@ -54,9 +59,9 @@ public:
     auto user = user_service.get(id);
     if (!user)
       return crow::response{crow::status::FORBIDDEN};
-    crow::json::rvalue body = crow::json::load(req.body);
-
-    auto new_message = model::message::from_json(body);
+    crow::json::wvalue body = crow::json::load(req.body);
+    body["user_id"] = user.value().id;
+    auto new_message = model::message::from_json(crow::json::load(body.dump()));
     auto old_message = message_service.get(new_message.id);
     if (!old_message or old_message.value().user_id != user.value().id)
       return crow::response{crow::status::NOT_FOUND};

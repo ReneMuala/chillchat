@@ -7,7 +7,7 @@
 #include <crow/app.h>
 #include <optional>
 #include <stdexcept>
-#include "../../middleware/auth.hpp"
+#include "../middleware/auth.hpp"
 #include "_common.hpp"
 namespace controller {
   using Session = crow::SessionMiddleware<crow::FileStore>;

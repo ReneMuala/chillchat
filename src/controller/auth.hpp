@@ -1,6 +1,6 @@
 #pragma once
-#include "../../middleware/auth.hpp"
-#include "../../service/user.hpp"
+#include "../middleware/auth.hpp"
+#include "../service/user.hpp"
 #include "_common.hpp"
 #include "crow/common.h"
 #include "crow/http_request.h"

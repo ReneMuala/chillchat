@@ -4,7 +4,7 @@ add_requires("sqlite_orm", "crow")
 target("chillchat-server")
 set_languages("c++23")
 set_kind("binary")
-add_files("src/*.cpp", "src/controller/api/*.cpp")
+add_files("src/*.cpp", "src/controller/*.cpp")
 add_packages("sqlite_orm", "crow")
 
 --

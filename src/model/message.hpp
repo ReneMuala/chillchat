@@ -32,7 +32,7 @@ namespace model {
 
         static inline model::message from_json(const crow::json::rvalue & json){
             return {
-                0,
+                json.has("id") ? (int)json["id"] : 0,
                 nullptr,
                 (int)json["user_id"].i(),
                 (int)json["channel_id"].i(),
